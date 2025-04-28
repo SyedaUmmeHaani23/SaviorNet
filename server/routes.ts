@@ -81,6 +81,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
               type: 'new_sos',
               payload: newVictim
             });
+            
+            // Send emergency email notification if emergency contact is provided
+            if (parsedMessage.payload.emergencyContact) {
+              sendSOSNotification(
+                {
+                  sosType: parsedMessage.payload.sosType,
+                  location: parsedMessage.payload.location,
+                  additionalInfo: parsedMessage.payload.additionalInfo
+                },
+                parsedMessage.payload.emergencyContact
+              ).then(result => {
+                if (!result.success) {
+                  console.log(`Failed to send emergency email: ${result.error}`);
+                } else {
+                  console.log(`Emergency notification sent to ${parsedMessage.payload.emergencyContact}`);
+                }
+              });
+            }
             break;
             
           case 'team_assignment':
@@ -401,6 +419,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         payload: alert
       });
       
+      // Send email notification for critical alerts if recipients provided
+      if (alert.severity === 'critical' && req.body.emailRecipients) {
+        const emailResult = await sendAlertEmail(alert, req.body.emailRecipients);
+        if (!emailResult.success) {
+          console.log(`Alert created but email notification failed: ${emailResult.error}`);
+        }
+      }
+      
       res.status(201).json(alert);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -441,6 +467,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate a simulated prediction using ensemble model approach for 2025
       let riskLevel = 0;
       let confidence = 0;
+      let modelSourceData = sourceData || {};
       
       if (useEnsemble) {
         // Simulating 3 different models with different specializations
@@ -478,8 +505,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         
         // Add ensemble details to source data
-        sourceData = {
-          ...sourceData,
+        modelSourceData = {
+          ...modelSourceData,
           ensemble: {
             models: models,
             ensembleMethod: 'weighted-confidence',
@@ -559,7 +586,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description,
         predictedTimeframe,
         affectedAreas,
-        sourceData: sourceData || { simulatedData: true, timestamp: new Date().toISOString() }
+        sourceData: modelSourceData || { simulatedData: true, timestamp: new Date().toISOString() }
       });
       
       // Create an alert if high risk or if confidence exceeds threshold
