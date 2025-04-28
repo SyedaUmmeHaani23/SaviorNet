@@ -73,6 +73,8 @@
 .alert-pulse {
   animation: pulse 2s infinite;
 }
+
+/* Enhanced SOS and Alert Animations */
 @keyframes pulse {
   0% {
     box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.7);
@@ -85,9 +87,94 @@
   }
 }
 
+@keyframes pulse-bg {
+  0% {
+    background-color: rgba(229, 62, 62, 0.1);
+  }
+  50% {
+    background-color: rgba(229, 62, 62, 0.3);
+  }
+  100% {
+    background-color: rgba(229, 62, 62, 0.1);
+  }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.sos-pulse-border {
+  animation: pulse 2s infinite;
+}
+
+.sos-pulse-bg {
+  animation: pulse-bg 2s infinite;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+/* Professional Emergency Theme - SaviorNet Custom Components */
+.disaster-card {
+  @apply border border-gray-200 rounded-lg p-4 transition-all duration-300;
+}
+
+.disaster-card-flood {
+  @apply border-l-4 border-red-500;
+}
+
+.disaster-card-earthquake {
+  @apply border-l-4 border-orange-500;
+}
+
+.disaster-card-wildfire {
+  @apply border-l-4 border-amber-500;
+}
+
+.disaster-card-high {
+  @apply bg-red-50;
+}
+
+.last-updated {
+  @apply text-xs text-gray-500 flex items-center gap-1;
+}
+
+/* Map Elements */
 .map-container {
-  height: 300px;
+  height: 400px;
   background-image: url('https://images.unsplash.com/photo-1569336415962-a4bd9f69cd83?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080');
   background-size: cover;
   background-position: center;
+}
+
+.map-marker {
+  @apply flex items-center justify-center rounded-full shadow-lg;
+}
+
+.map-marker-sos {
+  @apply bg-primary text-white;
+  animation: pulse 1.5s infinite;
+}
+
+.map-marker-team {
+  @apply bg-secondary text-white;
+}
+
+.map-marker-safe {
+  @apply bg-accent text-white;
+}
+
+/* Map Filter Buttons */
+.map-filter-button {
+  @apply px-3 py-1 text-sm font-medium rounded-full transition-all duration-200;
+}
+
+.map-filter-button-active {
+  @apply bg-secondary text-white;
+}
+
+.map-filter-button-inactive {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
 }
