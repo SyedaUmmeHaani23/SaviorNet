@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
+import { sendAlertEmail, sendSOSNotification } from "./emailService";
 import { 
   insertVictimSchema, 
   insertRescueTeamSchema, 
@@ -428,41 +429,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // AI Prediction Simulation (this would be replaced with actual ML models in production)
+  // AI Prediction Simulation with Ensemble Models (would use actual ML models in production)
   app.post("/api/simulate/prediction", async (req: Request, res: Response) => {
     try {
-      const { disasterType, region } = req.body;
+      const { disasterType, region, sourceData, useEnsemble, confidenceThreshold } = req.body;
       
       if (!disasterType || !region) {
         return res.status(400).json({ message: "Disaster type and region are required" });
       }
       
-      // Generate a simulated prediction
-      const riskLevel = Math.random();
+      // Generate a simulated prediction using ensemble model approach for 2025
+      let riskLevel = 0;
+      let confidence = 0;
+      
+      if (useEnsemble) {
+        // Simulating 3 different models with different specializations
+        const primaryModel = {
+          riskLevel: Math.random(),
+          confidence: 0.80 + (Math.random() * 0.15),
+          source: 'primary-model'
+        };
+        
+        const regionalModel = {
+          riskLevel: Math.random(),
+          confidence: 0.82 + (Math.random() * 0.12),
+          source: 'region-specialized-model'
+        };
+        
+        const historicalModel = {
+          riskLevel: Math.random(),
+          confidence: 0.75 + (Math.random() * 0.20),
+          source: 'historical-pattern-model'
+        };
+        
+        // Ensemble technique: weighted average based on confidence
+        const models = [primaryModel, regionalModel, historicalModel];
+        const totalConfidence = models.reduce((sum, model) => sum + model.confidence, 0);
+        
+        // Calculate weighted risk level and confidence
+        riskLevel = models.reduce(
+          (risk, model) => risk + (model.riskLevel * (model.confidence / totalConfidence)), 
+          0
+        );
+        
+        confidence = models.reduce(
+          (conf, model) => conf + (model.confidence * (model.confidence / totalConfidence)), 
+          0
+        );
+        
+        // Add ensemble details to source data
+        sourceData = {
+          ...sourceData,
+          ensemble: {
+            models: models,
+            ensembleMethod: 'weighted-confidence',
+            timestamp: new Date().toISOString()
+          }
+        };
+      } else {
+        // Legacy single model simulation
+        riskLevel = Math.random();
+        confidence = 0.7 + (Math.random() * 0.25);
+      }
+      
+      // Determine severity based on risk level
       let severity = "low";
       if (riskLevel > 0.7) severity = "high";
       else if (riskLevel > 0.4) severity = "medium";
       
-      const predictedTimeframe = ["immediate", "6 hours", "12 hours", "24 hours"][Math.floor(Math.random() * 4)];
+      // For 2025: more varied timeframes for prediction and more precise predictions
+      const timeframes = [
+        "immediate", "2 hours", "4 hours", "6 hours", "8 hours", 
+        "12 hours", "18 hours", "24 hours", "36 hours", "48 hours"
+      ];
+      const predictedTimeframe = timeframes[Math.floor(Math.random() * timeframes.length)];
+      
+      // Enhanced descriptions for more actionable intelligence
+      let description = "";
+      if (disasterType === "flood") {
+        if (severity === "high") {
+          description = `Expected heavy rainfall in next ${predictedTimeframe}. Recommend evacuation of low-lying areas. Water levels rising rapidly in ${region}.`;
+        } else if (severity === "medium") {
+          description = `Moderate rainfall expected in ${region}. Monitor water levels and prepare for possible evacuation in flood-prone areas.`;
+        } else {
+          description = `Light rainfall predicted. Low flood risk in ${region}, but continue monitoring weather updates.`;
+        }
+      } else if (disasterType === "earthquake") {
+        if (severity === "high") {
+          description = `High seismic activity detected. Significant earthquake risk in ${region}. Prepare for strong tremors within ${predictedTimeframe}.`;
+        } else if (severity === "medium") {
+          description = `Mild tremors detected in ${region} region. Pattern recognition suggests low probability of major event.`;
+        } else {
+          description = `Minor seismic activity. Continuous monitoring recommended in ${region}.`;
+        }
+      } else if (disasterType === "wildfire") {
+        if (severity === "high") {
+          description = `Extreme fire risk due to high temperatures and dry conditions in ${region}. Evacuation may be necessary in ${predictedTimeframe}.`;
+        } else if (severity === "medium") {
+          description = `Elevated fire risk in ${region}. Avoid activities that could spark fires and maintain vigilance.`;
+        } else {
+          description = `Standard fire precautions recommended in ${region}. Current risk is low but subject to change with weather conditions.`;
+        }
+      } else {
+        description = `AI-generated ${severity} risk prediction for ${disasterType} in ${region}. Confidence level: ${Math.round(confidence * 100)}%.`;
+      }
+      
+      // More detailed affected areas for better resource planning
+      const affectedAreas = [region];
+      
+      // For high severity, add adjacent areas that might be affected
+      if (severity === "high") {
+        if (disasterType === "flood" && region.includes("River")) {
+          // Simulate downstream areas for river floods
+          affectedAreas.push(`${region} Delta`, `Lower ${region}`);
+        } else if (disasterType === "wildfire") {
+          // Simulate spreading direction for wildfires
+          affectedAreas.push(`Northern ${region}`, `Eastern ${region}`);
+        } else if (disasterType === "earthquake") {
+          // Simulate radius for earthquakes
+          affectedAreas.push(`${region} Coastal Areas`, `${region} Urban Centers`);
+        }
+      }
       
       const prediction = await storage.createDisasterPrediction({
         disasterType,
         region,
         riskLevel,
         severity,
-        description: `AI-generated ${severity} risk prediction for ${disasterType} in ${region}.`,
+        description,
         predictedTimeframe,
-        affectedAreas: [region],
-        sourceData: { simulatedData: true, timestamp: new Date().toISOString() }
+        affectedAreas,
+        sourceData: sourceData || { simulatedData: true, timestamp: new Date().toISOString() }
       });
       
-      // Create an alert if high risk
-      if (severity === "high") {
+      // Create an alert if high risk or if confidence exceeds threshold
+      const shouldCreateAlert = severity === "high" || 
+                               (confidenceThreshold && confidence >= confidenceThreshold);
+      
+      if (shouldCreateAlert) {
+        // Create more detailed alerts for 2025
+        const alertTitle = `${disasterType.charAt(0).toUpperCase() + disasterType.slice(1)} ${severity === "high" ? "Warning" : "Advisory"}`;
+        
+        // More actionable message with location precision
+        const alertMessage = severity === "high"
+          ? `URGENT: ${Math.round(riskLevel * 100)}% risk in ${predictedTimeframe} for ${region}. Prepare for immediate action.`
+          : `${Math.round(riskLevel * 100)}% ${disasterType} risk detected in ${region}. Expected in ${predictedTimeframe}. Stay alert.`;
+        
         const alert = await storage.createAlert({
           predictionId: prediction.id,
-          title: `${disasterType.charAt(0).toUpperCase() + disasterType.slice(1)} Warning`,
-          message: `${region}: ${Math.round(riskLevel * 100)}% chance in ${predictedTimeframe}`,
-          severity: "critical",
+          title: alertTitle,
+          message: alertMessage,
+          severity: severity === "high" ? "critical" : "warning",
           region,
           isActive: true
         });
@@ -482,6 +599,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.status(201).json(prediction);
     } catch (error) {
+      console.error('Error in prediction simulation:', error);
       res.status(500).json({ message: "Failed to create simulated prediction" });
     }
   });

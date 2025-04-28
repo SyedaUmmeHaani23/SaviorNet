@@ -53,7 +53,7 @@ export async function sendSOSViaSMS(sosData: {
     console.log('[SMS] Preparing SOS SMS fallback with data:', sosData);
     
     // Format the SMS message with critical details only (to keep SMS short)
-    const message = `SOS ALERT: ${sosType} emergency at location ${sosData.location.lat.toFixed(6)},${sosData.location.lng.toFixed(6)}. ${sosData.additionalInfo || ''}`;
+    const message = `SOS ALERT: ${sosData.sosType} emergency at location ${sosData.location.lat.toFixed(6)},${sosData.location.lng.toFixed(6)}. ${sosData.additionalInfo || ''}`;
     
     // This would make an API call to your server which would use Twilio
     // Simulating successful SMS dispatch for demo

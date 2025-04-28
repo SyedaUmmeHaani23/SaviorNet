@@ -607,11 +607,15 @@ export const DisasterProvider: React.FC<{ children: ReactNode }> = ({ children }
       shelters,
       isLoading,
       isWebSocketConnected: isConnected,
+      isOfflineMode,
       sendSOS,
       assignTeam,
       updateTeamLocation,
       markVictimRescued,
-      runPrediction
+      runPrediction,
+      translateAlertMessage,
+      getAudioForMessage,
+      sendSMSAlert
     }}>
       {children}
     </DisasterContext.Provider>

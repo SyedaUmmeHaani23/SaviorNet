@@ -155,8 +155,8 @@ export async function runDisasterPrediction(type: string, locationData: any) {
     
     // First try to use cached prediction for this region
     try {
-      const cachedPrediction = await localForage.getItem(`${type}-latest-prediction-${locationData.region}`);
-      if (cachedPrediction) {
+      const cachedPrediction = await localForage.getItem<any>(`${type}-latest-prediction-${locationData.region}`);
+      if (cachedPrediction && cachedPrediction.cachedAt) {
         const cacheAge = new Date().getTime() - new Date(cachedPrediction.cachedAt).getTime();
         // Only use cache if less than 3 hours old
         if (cacheAge < 3 * 60 * 60 * 1000) {
