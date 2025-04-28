@@ -1,0 +1,73 @@
+ Challenges While Building SaviorNet and How to Solve Them
+1️⃣ Challenge: Accurate Disaster Prediction (AI Model Limitations)
+Problem:
+Disaster data (especially real-time flood, fire, earthquake data) can be noisy, incomplete, and sometimes delayed.
+
+Solution:
+
+Use ensemble models: combine predictions from multiple sources (weather APIs, satellite feeds, seismic data).
+
+Implement continuous learning: models retrain with new real-world field data periodically.
+
+Set confidence thresholds: Only trigger alerts when AI is 85%+ confident to minimize false alarms.
+
+2️⃣ Challenge: No Internet Connectivity During Disasters
+Problem:
+Disaster-affected zones often lose mobile data and network connectivity.
+
+Solution:
+
+Design offline-first mobile app using React Native and Service Workers.
+
+Implement automatic SMS alert fallback using Twilio or Firebase Cloud Messaging for basic warnings.
+
+Cache nearest shelter locations locally on the device even before a disaster.
+
+3️⃣ Challenge: Real-Time Location Tracking and Rescue Assignment
+Problem:
+Live GPS tracking and rescue mapping can consume heavy bandwidth and battery during disasters.
+
+Solution:
+
+Optimize Google Maps API requests to minimum frequency needed.
+
+Use location approximation (triangulation) if GPS is weak.
+
+Update rescue status only at critical points (e.g., dispatched, arrived, completed) rather than live every second.
+
+4️⃣ Challenge: Multilingual Communication for Alerts
+Problem:
+India has diverse languages; people may not understand English alerts.
+
+Solution:
+
+Integrate real-time language translation APIs like Google Cloud Translate for critical messages.
+
+Pre-prepare common alert templates in multiple languages (Kannada, Hindi, Urdu, etc.).
+
+Offer voice-based alerts using text-to-speech for non-readers.
+
+5️⃣ Challenge: Ensuring Data Security and Privacy
+Problem:
+Victims' personal data (name, phone, location) is very sensitive during disasters.
+
+Solution:
+
+Apply end-to-end encryption for all app communications.
+
+Anonymize user data wherever possible (e.g., only share location with authorized rescue teams).
+
+Maintain audit trails for every data access for accountability.
+
+6️⃣ Challenge: Rescue Force Availability and Readiness
+Problem:
+Some rescue teams might already be busy, delayed, or unable to respond immediately.
+
+Solution:
+
+Maintain dynamic availability status (Available / Busy / Out of Service) in the dashboard.
+
+Auto-suggest next-nearest team if first-choice rescue team is occupied.
+
+Allow community volunteers to register and assist if official teams are insufficient.
+
