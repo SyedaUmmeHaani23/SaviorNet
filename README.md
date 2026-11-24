@@ -8,14 +8,6 @@
   An intelligent disaster management platform designed to improve emergency coordination, streamline rescue operations, and connect citizens, administrators, and rescue teams through a unified digital ecosystem.
 </p>
 
-<p align="center">
-  ![React](https://img.shields.io/badge/React-2026-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-  ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-  ![Node.js](https://img.shields.io/badge/Node.js-Backend-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-  ![WebSocket](https://img.shields.io/badge/WebSocket-Real--Time-010101?style=for-the-badge&logo=socketdotio&logoColor=white)
-</p>
-
 ---
 
 ## 🚨 About the Project
